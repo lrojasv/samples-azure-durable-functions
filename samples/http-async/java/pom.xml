@@ -62,6 +62,9 @@
                     <source>${java.version}</source>
                     <target>${java.version}</target>
                     <encoding>${project.build.sourceEncoding}</encoding>
+                    <jvmOptions>
+                        -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005
+                    </jvmOptions>
                 </configuration>
             </plugin>
             <plugin>

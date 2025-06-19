@@ -91,13 +91,19 @@ public class DurableFunctionsOrchestratorSample {
         Gson gson = new Gson();
         final String payload = gson.toJson(responseBody);
         
+        context.getLogger().info("Antes de generar el httprequest");
         final HttpRequest httpRequest = HttpRequest.newBuilder()
                 //.POST(HttpRequest.BodyPublishers.ofString(payload))
-                .POST(null)
+                .POST(HttpRequest.BodyPublishers.noBody())
                 .uri(URI.create(urlFunction))
                 .setHeader("Content-Type","application/json")
                 .build();
         
+        context.getLogger().info("Antes de llamar a function python");
+        if(httpClient==null){
+            context.getLogger().info("httpclient es null");
+        }
+
         final HttpResponse<String> response = httpClient.send(httpRequest, 
             HttpResponse.BodyHandlers.ofString());
 
