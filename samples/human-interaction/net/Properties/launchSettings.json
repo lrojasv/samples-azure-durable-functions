@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "DurableFunction_HumanInteraction": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7151",
+      "launchBrowser": false
+    }
+  }
+}
