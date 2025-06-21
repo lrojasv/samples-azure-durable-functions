@@ -8,21 +8,19 @@ app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 def fnc_modelo(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
 
-    name = req.params.get('name')
-    if not name:
+    parameter = req.params.get('parameter1')
+    if not parameter:
         try:
             req_body = req.get_json()
         except ValueError:
             pass
         else:
-            name = req_body.get('name')
+            parameter = req_body.get('parameter1')
 
-    time.sleep(180) #timer de espera para simular largas esperas por procesamiento
+    time.sleep(1) #timer de espera para simular largas esperas por procesamiento
 
-    if name:
-        return func.HttpResponse(f"Hello, {name}. This HTTP triggered function executed successfully.")
-    else:
-        return func.HttpResponse(
-             "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response.",
+    return func.HttpResponse(
+             "This HTTP triggered function executed successfully." + parameter,
              status_code=200
         )
+        

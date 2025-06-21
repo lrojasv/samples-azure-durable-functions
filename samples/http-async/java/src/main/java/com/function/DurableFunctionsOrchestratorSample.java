@@ -2,13 +2,14 @@ package com.function;
 
 import com.microsoft.azure.functions.annotation.*;
 import com.microsoft.azure.functions.*;
-import com.microsoft.azure.functions.HttpResponseMessage.Builder;
-
 import java.net.URI;
-import java.net.http.HttpHeaders;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.*;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
+
+import javax.lang.model.type.ErrorType;
 
 import com.microsoft.durabletask.*;
 import com.microsoft.durabletask.azurefunctions.DurableActivityTrigger;
@@ -66,8 +67,17 @@ public class DurableFunctionsOrchestratorSample {
     public String Orquestador(
             @DurableOrchestrationTrigger(name = "ctx") TaskOrchestrationContext ctx) {
 
-        ctx.callActivity("EjecutarModeloAnaliticoActivity", "Parameter1", String.class).await();
+        ctx.setCustomStatus("PENDING"); //con esto se maneja el custom error del workflow
 
+        try{           
+            ctx.callActivity("EjecutarModeloAnaliticoActivity", "Parameter1", String.class).await();           
+        }
+        catch(TaskFailedException  ex){
+            //aqui puedes ejecutar alguna compensación
+            ctx.setCustomStatus("ERROR");
+        }
+        
+        ctx.setCustomStatus("OK");
         return "OK";
     }
 
@@ -82,36 +92,38 @@ public class DurableFunctionsOrchestratorSample {
 
         context.getLogger().info("Se inicia ejecución de modelo analítico");
         
-        var httpClient = HttpClientCustom.getInstance().getHttpClient();
-        var urlFunction = System.getenv("URL_FUNCTION_MODELO_ANALITICO") + "/api/fnc_modelo";
-        
-        JsonObject responseBody = new JsonObject();
-        responseBody.addProperty("parameter1", "valor parameter 1");
+        try{
+            var httpClient = HttpClientCustom.getInstance().getHttpClient();
+            var urlFunction = System.getenv("URL_FUNCTION_MODELO_ANALITICO") + "/api/fnc_modelo";
+            
+            JsonObject responseBody = new JsonObject();
+            responseBody.addProperty("parameter1", "valor parameter 1");
 
-        Gson gson = new Gson();
-        final String payload = gson.toJson(responseBody);
-        
-        context.getLogger().info("Antes de generar el httprequest");
-        final HttpRequest httpRequest = HttpRequest.newBuilder()
-                //.POST(HttpRequest.BodyPublishers.ofString(payload))
-                .POST(HttpRequest.BodyPublishers.noBody())
-                .uri(URI.create(urlFunction))
-                .setHeader("Content-Type","application/json")
-                .build();
-        
-        context.getLogger().info("Antes de llamar a function python");
-        if(httpClient==null){
-            context.getLogger().info("httpclient es null");
+            Gson gson = new Gson();
+            final String payload = gson.toJson(responseBody);
+            
+            context.getLogger().info("Antes de generar el httprequest - payload " + payload);
+            final HttpRequest httpRequest = HttpRequest.newBuilder()
+                    .POST(HttpRequest.BodyPublishers.ofString(payload))
+                    .uri(URI.create(urlFunction))
+                    .setHeader("Content-Type","application/json")
+                    .build();
+            
+            final HttpResponse<String> response = httpClient.send(httpRequest, 
+                HttpResponse.BodyHandlers.ofString());
+
+            if(response.statusCode() != HttpStatus.OK.value()){
+                context.getLogger().info("error de invocacion: status"+ response.statusCode());
+                return "ERROR";
+            }  
+
+            return "OK";
         }
-
-        final HttpResponse<String> response = httpClient.send(httpRequest, 
-            HttpResponse.BodyHandlers.ofString());
-
-        if(response.statusCode() != HttpStatus.OK.value()){
-            throw new Exception("Error");
-        }  
-
-        return "OK";
+        catch(Exception ex){
+            context.getLogger().info(ex.getMessage() + ex.getStackTrace());
+            throw new Exception("ERROR");
+        }
+        
     }
 
     private String getStatusQueryGetUri(String instanceId){

@@ -1,0 +1,10 @@
+### POST Test iniciar orquestacion
+POST http://localhost:7071/api/StartOrchestration
+Authorization: none
+Content-Type: application/json
+
+
+### GET Test statusQueryGetUri
+GET http://localhost:7071/runtime/webhooks/durabletask/instances/215f5aed-f117-464a-8dad-2c0844d5d4d0
+Authorization: none
+Content-Type: application/json
