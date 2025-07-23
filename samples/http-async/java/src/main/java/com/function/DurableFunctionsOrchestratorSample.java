@@ -77,7 +77,7 @@ public class DurableFunctionsOrchestratorSample {
             ctx.setCustomStatus("ERROR");
         }
         
-        ctx.setCustomStatus("OK");
+        ctx.setCustomStatus("COMPLETED");
         return "OK";
     }
 
