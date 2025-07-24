@@ -4,9 +4,9 @@ Este repositorio tiene el objetivo de compartir ejemplos de uso de Azure Durable
 
 ## Lista de ejemplos
 
-| Patron      | Ejemplo en C#     | Ejemplo en Java |
-| ------------- | ------------- | ------------------|
-| Human Interaction | Ejemplo c# | Ejemplo Java |
+| Patron      | Lenguajes     | 
+| ------------- | ------------- |
+| <a href="samples/http-async/README.md">Http Async Api</a> | java, Net |
 
 ## Consideraciones con Azure Durable Function
 
