@@ -1,0 +1,11 @@
+### Sample POST Request
+POST http://localhost:7072/api/fnc_modelo
+Authorization: none
+Content-Type: application/json
+
+{
+  "parameter1": "value test"
+}
+
+
+
